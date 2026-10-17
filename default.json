@@ -6,5 +6,6 @@
     ":disableRateLimiting",
     "helpers:pinGitHubActionDigests"
   ],
-  "automerge": false
+  "automerge": false,
+  "semanticCommits": "enabled"
 }
