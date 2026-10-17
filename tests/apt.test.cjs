@@ -7,7 +7,7 @@ const jsonata = requireRenovate('jsonata');
 const YAML = requireRenovate('yaml');
 const preset = require('../images.json');
 
-const manager = preset.customManagers.find((m) => m.versioningTemplate === 'deb');
+const manager = preset.customManagers.find((m) => !m.datasourceTemplate);
 const registryUrl = 'https://zrepl.cschwarz.com/apt/debian?suite=trixie&components=main&binaryArch=amd64';
 const upstream = { datasource: 'deb', depName: 'zrepl', registryUrl, version: '0.7.0-1' };
 
@@ -21,7 +21,7 @@ async function extract(content) {
 
 test('APT manager parses YAML and discovers the full package version using Debian versioning', async () => {
   assert.equal(manager.fileFormat, 'yaml');
-  assert.equal(manager.versioningTemplate, 'deb');
+  assert.equal(preset.packageRules.find((r) => r.matchDatasources?.includes('deb')).versioning, 'deb');
   const content = YAML.stringify({ tracks: [{ name: 'stable', upstream }] });
   assert.deepEqual(await extract(content), [{ datasource: 'deb', depName: 'zrepl', registryUrl, currentValue: '0.7.0-1' }]);
 });
@@ -56,11 +56,16 @@ test('each track has its own package metadata, with no hard-coded package name',
   assert.equal((await extract(content.replace('1.2.3-4', '1.2.4-1')))[0].currentValue, '0.7.0-1');
 });
 
-test('unannotated tracks, other datasources and missing pins are not extracted', async () => {
+test('unannotated tracks and incomplete upstream metadata are not extracted', async () => {
   for (const track of [
     { name: 'stable', version: '0.7.0' },
-    { upstream: { ...upstream, datasource: 'github-releases' } },
+    { upstream: { ...upstream, datasource: undefined } },
+    { upstream: { ...upstream, datasource: '' } },
+    { upstream: { ...upstream, depName: undefined } },
+    { upstream: { ...upstream, depName: '' } },
     { upstream: { ...upstream, version: undefined } },
+    { upstream: { ...upstream, version: '' } },
+    { upstream: { ...upstream, version: 123 } },
   ]) assert.deepEqual(await extract(YAML.stringify({ tracks: [track] })), []);
 });
 

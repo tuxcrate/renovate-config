@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "description": "Opt-in container image and APT package update policy for Tuxcrate image repositories",
+  "description": "Opt-in container image, APT, and PyPI package update policy for Tuxcrate image repositories",
   "extends": [
     "github>tuxcrate/renovate-config"
   ],
@@ -19,20 +19,28 @@
     {
       "customType": "jsonata",
       "fileFormat": "yaml",
-      "description": "Update APT package versions from structured upstream metadata in meta.yaml",
+      "description": "Discover packages using each track's upstream datasource in meta.yaml",
       "managerFilePatterns": ["/(^|/)meta\\.yaml$/"],
       "matchStrings": [
-        "tracks[upstream.datasource = 'deb' and $type(upstream.version) = 'string'].{ 'datasource': upstream.datasource, 'depName': upstream.depName, 'registryUrl': upstream.registryUrl, 'currentValue': upstream.version }"
-      ],
-      "versioningTemplate": "deb"
+        "tracks[$type(upstream.datasource) = 'string' and upstream.datasource != '' and $type(upstream.depName) = 'string' and upstream.depName != '' and $type(upstream.version) = 'string' and upstream.version != ''].{ 'datasource': upstream.datasource, 'depName': upstream.depName, 'registryUrl': upstream.registryUrl, 'currentValue': upstream.version }"
+      ]
     }
   ],
   "packageRules": [
+    {
+      "description": "Only propose supported stable X.Y.Z PyPI versions",
+      "matchManagers": ["custom.jsonata"],
+      "matchDatasources": ["pypi"],
+      "matchFileNames": ["**/meta.yaml"],
+      "versioning": "pep440",
+      "allowedVersions": "/^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$/"
+    },
     {
       "description": "Only propose supported stable APT package versions; PR builds verify both architectures",
       "matchManagers": ["custom.jsonata"],
       "matchDatasources": ["deb"],
       "matchFileNames": ["**/meta.yaml"],
+      "versioning": "deb",
       "allowedVersions": "/^[0-9]+\\.[0-9]+\\.[0-9]+-[0-9]+$/",
       "prBodyNotes": ["APT discovery checks amd64 only. Require successful uncached linux/amd64 and linux/arm64 PR builds before merging. If arm64 publication is delayed, rerun the failed build after the package becomes available."]
     },
