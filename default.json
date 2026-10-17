@@ -21,6 +21,11 @@
         "lockFileMaintenance"
       ],
       "automerge": true
+    },
+    {
+      "description": "Assign major updates for review",
+      "matchUpdateTypes": ["major"],
+      "assignees": ["Skaronator"]
     }
   ],
   "semanticCommits": "enabled"

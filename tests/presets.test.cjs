@@ -18,7 +18,7 @@ test('the default preset automerges non-major updates through platform pull requ
   assert.equal(general.automergeType, 'pr');
   assert.equal(general.platformAutomerge, true);
   assert.equal(general.ignoreTests, undefined);
-  assert.equal(general.packageRules.length, 1);
+  assert.equal(general.packageRules.length, 2);
   const rule = general.packageRules[0];
   assert.deepEqual(rule.matchUpdateTypes, [
     'minor',
@@ -32,6 +32,15 @@ test('the default preset automerges non-major updates through platform pull requ
   // Include pre-1.0 dependencies and all packages, not per-repository allowlists.
   assert.equal(rule.matchCurrentVersion, undefined);
   assert.equal(rule.matchPackageNames, undefined);
+});
+
+test('the default preset assigns only major updates for review', () => {
+  assert.equal(general.assignees, undefined);
+  const rules = general.packageRules.filter((rule) => rule.assignees !== undefined);
+  assert.equal(rules.length, 1);
+  assert.deepEqual(rules[0].matchUpdateTypes, ['major']);
+  assert.deepEqual(rules[0].assignees, ['Skaronator']);
+  assert.equal(rules[0].automerge, undefined);
 });
 
 test('the images preset retains the inherited automerge policy', () => {
