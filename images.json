@@ -6,11 +6,12 @@
   ],
   "customManagers": [
     {
-      "customType": "regex",
+      "customType": "jsonata",
+      "fileFormat": "yaml",
       "description": "Update digest-pinned baseImage references in meta.yaml release tracks",
       "managerFilePatterns": ["/(^|/)meta\\.yaml$/"],
       "matchStrings": [
-        "(?:^|\\r?\\n)[ \\t]*baseImage:[ \\t]*[\"']?(?<depName>[^\"'\\s@]+):(?<currentValue>[A-Za-z0-9_][A-Za-z0-9_.-]{0,127})@(?<currentDigest>sha256:[0-9a-f]{64})[\"']?[ \\t]*(?:#[^\\r\\n]*)?(?:\\r?\\n|$)"
+        "tracks[$type(baseImage) = 'string'].baseImage.$match(/^([^\\s@]+):([A-Za-z0-9_][A-Za-z0-9_.-]{0,127})@(sha256:[0-9a-f]{64})$/).{ 'depName': groups[0], 'currentValue': groups[1], 'currentDigest': groups[2] }"
       ],
       "datasourceTemplate": "docker",
       "versioningTemplate": "docker"

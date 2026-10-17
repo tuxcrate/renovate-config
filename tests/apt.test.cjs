@@ -7,7 +7,7 @@ const jsonata = requireRenovate('jsonata');
 const YAML = requireRenovate('yaml');
 const preset = require('../images.json');
 
-const manager = preset.customManagers.find((m) => m.customType === 'jsonata');
+const manager = preset.customManagers.find((m) => m.versioningTemplate === 'deb');
 const registryUrl = 'https://zrepl.cschwarz.com/apt/debian?suite=trixie&components=main&binaryArch=amd64';
 const upstream = { datasource: 'deb', depName: 'zrepl', registryUrl, version: '0.7.0-1' };
 
