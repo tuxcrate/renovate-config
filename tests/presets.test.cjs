@@ -6,7 +6,7 @@ const images = require('../images.json');
 test('the default preset contains only general repository policy', () => {
   assert.deepEqual(general.extends, [
     'config:recommended',
-    ':removeRateLimit',
+    ':disableRateLimiting',
     'helpers:pinGitHubActionDigests',
   ]);
   assert.equal(general.automerge, false);
