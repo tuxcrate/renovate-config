@@ -9,7 +9,7 @@ const preset = require('../images.json');
 
 const manager = preset.customManagers.find((m) => m.customType === 'jsonata');
 const registryUrl = 'https://zrepl.cschwarz.com/apt/debian?suite=trixie&components=main&binaryArch=amd64';
-const upstream = { datasource: 'deb', depName: 'zrepl', registryUrl, version: '0.7.0-1', buildArg: 'ZREPL_PACKAGE_VERSION' };
+const upstream = { datasource: 'deb', depName: 'zrepl', registryUrl, version: '0.7.0-1' };
 
 async function extract(content) {
   // Renovate parses YAML as an array of documents before evaluating JSONata.
@@ -32,7 +32,7 @@ test('key order, indentation, quoting, flow mappings, comments and CRLF do not a
   for (const content of [
     YAML.stringify({ tracks: [{ upstream: reordered, aliases: ['latest'], name: 'stable' }] }, { indent: 4 }),
     YAML.stringify({ tracks: [{ upstream, name: 'stable' }] }, { collectionStyle: 'flow' }),
-    `# any order is fine\ntracks:\n- aliases: ['{major}.{minor}', latest]\n  upstream:\n    version: '0.7.0-1' # exact APT pin\n    registryUrl: '${registryUrl}'\n    buildArg: ZREPL_PACKAGE_VERSION\n    depName: zrepl\n    datasource: deb\n  name: stable\n`.replaceAll('\n', '\r\n'),
+    `# any order is fine\ntracks:\n- aliases: ['{major}.{minor}', latest]\n  upstream:\n    version: '0.7.0-1' # exact APT pin\n    registryUrl: '${registryUrl}'\n    depName: zrepl\n    datasource: deb\n  name: stable\n`.replaceAll('\n', '\r\n'),
   ]) assert.deepEqual(await extract(content), expected, content);
 });
 
@@ -48,8 +48,8 @@ test('package-only and application updates round trip while preserving YAML text
   }
 });
 
-test('each track has its own package metadata, with no hard-coded package or argument name', async () => {
-  const other = { ...upstream, depName: 'other-package', version: '1.2.3-4', buildArg: 'OTHER_PACKAGE_VERSION' };
+test('each track has its own package metadata, with no hard-coded package name', async () => {
+  const other = { ...upstream, depName: 'other-package', version: '1.2.3-4' };
   const content = YAML.stringify({ tracks: [{ name: 'stable', upstream }, { name: 'other', upstream: other }] });
   const deps = await extract(content);
   assert.deepEqual(deps.map((d) => [d.depName, d.currentValue]), [['zrepl', '0.7.0-1'], ['other-package', '1.2.3-4']]);
