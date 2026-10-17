@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const { test } = require('node:test');
 const { createRequire } = require('node:module');
-// Run inside the pinned Renovate image, using its actual dependency versions.
+// Run inside the CI Renovate image, using its actual dependency versions.
 const requireRenovate = createRequire('/usr/local/renovate/package.json');
 const jsonata = requireRenovate('jsonata');
 const YAML = requireRenovate('yaml');
