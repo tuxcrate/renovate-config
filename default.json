@@ -7,5 +7,21 @@
     "helpers:pinGitHubActionDigests"
   ],
   "automerge": false,
+  "automergeType": "pr",
+  "platformAutomerge": true,
+  "packageRules": [
+    {
+      "description": "Automerge non-major updates after required checks pass",
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "pinDigest",
+        "digest",
+        "lockFileMaintenance"
+      ],
+      "automerge": true
+    }
+  ],
   "semanticCommits": "enabled"
 }

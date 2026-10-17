@@ -12,7 +12,31 @@ test('the default preset contains only general repository policy', () => {
   ]);
   assert.equal(general.automerge, false);
   assert.equal(general.customManagers, undefined);
-  assert.equal(general.packageRules, undefined);
+});
+
+test('the default preset automerges non-major updates through platform pull requests', () => {
+  assert.equal(general.automergeType, 'pr');
+  assert.equal(general.platformAutomerge, true);
+  assert.equal(general.ignoreTests, undefined);
+  assert.equal(general.packageRules.length, 1);
+  const rule = general.packageRules[0];
+  assert.deepEqual(rule.matchUpdateTypes, [
+    'minor',
+    'patch',
+    'pin',
+    'pinDigest',
+    'digest',
+    'lockFileMaintenance',
+  ]);
+  assert.equal(rule.automerge, true);
+  // Include pre-1.0 dependencies and all packages, not per-repository allowlists.
+  assert.equal(rule.matchCurrentVersion, undefined);
+  assert.equal(rule.matchPackageNames, undefined);
+});
+
+test('the images preset retains the inherited automerge policy', () => {
+  assert.equal(images.automerge, undefined);
+  assert.ok(images.packageRules.every((rule) => rule.automerge === undefined));
 });
 
 test('the opt-in images preset inherits general policy and adds container rules', () => {
