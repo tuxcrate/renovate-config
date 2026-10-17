@@ -1,0 +1,50 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Opt-in container image and APT package update policy for Tuxcrate image repositories",
+  "extends": [
+    "github>tuxcrate/renovate-config"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update digest-pinned baseImage references in meta.yaml release tracks",
+      "managerFilePatterns": ["/(^|/)meta\\.yaml$/"],
+      "matchStrings": [
+        "(?:^|\\r?\\n)[ \\t]*baseImage:[ \\t]*[\"']?(?<depName>[^\"'\\s@]+):(?<currentValue>[A-Za-z0-9_][A-Za-z0-9_.-]{0,127})@(?<currentDigest>sha256:[0-9a-f]{64})[\"']?[ \\t]*(?:#[^\\r\\n]*)?(?:\\r?\\n|$)"
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker"
+    },
+    {
+      "customType": "jsonata",
+      "fileFormat": "yaml",
+      "description": "Update APT package versions from structured upstream metadata in meta.yaml",
+      "managerFilePatterns": ["/(^|/)meta\\.yaml$/"],
+      "matchStrings": [
+        "tracks[upstream.datasource = 'deb' and $type(upstream.version) = 'string'].{ 'datasource': upstream.datasource, 'depName': upstream.depName, 'registryUrl': upstream.registryUrl, 'currentValue': upstream.version }"
+      ],
+      "versioningTemplate": "deb"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Only propose supported stable APT package versions; PR builds verify both architectures",
+      "matchManagers": ["custom.jsonata"],
+      "matchDatasources": ["deb"],
+      "matchFileNames": ["**/meta.yaml"],
+      "allowedVersions": "/^[0-9]+\\.[0-9]+\\.[0-9]+-[0-9]+$/",
+      "prBodyNotes": ["APT discovery checks amd64 only. Require successful uncached linux/amd64 and linux/arm64 PR builds before merging. If arm64 publication is delayed, rerun the failed build after the package becomes available."]
+    },
+    {
+      "description": "Keep the shared container workflow on its coordinated tooling ref",
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["tuxcrate/github-actions"],
+      "pinDigests": false
+    },
+    {
+      "description": "Pin container images to immutable digests and track upstream changes",
+      "matchDatasources": ["docker"],
+      "pinDigests": true
+    }
+  ]
+}

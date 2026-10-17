@@ -1,0 +1,24 @@
+name: Validate Renovate presets
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    container:
+      image: ghcr.io/renovatebot/renovate:44.165.3@sha256:dc5851d4f6019568a573be14129b889113e897507a4db856fb5699eaa4648849
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Validate presets and repository configuration
+        run: renovate-config-validator --strict --no-global default.json images.json renovate.json
+      - name: Test custom manager extraction and replacement
+        run: node --test tests/*.test.cjs

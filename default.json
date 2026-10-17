@@ -1,0 +1,10 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Shared dependency update policy for all Tuxcrate repositories",
+  "extends": [
+    "config:recommended",
+    ":removeRateLimit",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "automerge": false
+}
