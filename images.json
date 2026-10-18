@@ -22,7 +22,7 @@
       "description": "Discover packages using each track's upstream datasource in meta.yaml",
       "managerFilePatterns": ["/(^|/)meta\\.yaml$/"],
       "matchStrings": [
-        "tracks[$type(upstream.datasource) = 'string' and upstream.datasource != '' and $type(upstream.depName) = 'string' and upstream.depName != '' and $type(upstream.version) = 'string' and upstream.version != ''].{ 'datasource': upstream.datasource, 'depName': upstream.depName, 'registryUrl': upstream.registryUrl, 'currentValue': upstream.version }"
+        "tracks[$type(upstream.datasource) = 'string' and upstream.datasource != '' and $type(upstream.depName) = 'string' and upstream.depName != '' and $type(upstream.version) = 'string' and upstream.version != ''].{ 'datasource': upstream.datasource, 'depName': upstream.depName, 'depType': name, 'registryUrl': upstream.registryUrl, 'currentValue': upstream.version }"
       ]
     }
   ],

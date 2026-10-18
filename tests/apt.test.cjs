@@ -23,11 +23,11 @@ test('APT manager parses YAML and discovers the full package version using Debia
   assert.equal(manager.fileFormat, 'yaml');
   assert.equal(preset.packageRules.find((r) => r.matchDatasources?.includes('deb')).versioning, 'deb');
   const content = YAML.stringify({ tracks: [{ name: 'stable', upstream }] });
-  assert.deepEqual(await extract(content), [{ datasource: 'deb', depName: 'zrepl', registryUrl, currentValue: '0.7.0-1' }]);
+  assert.deepEqual(await extract(content), [{ datasource: 'deb', depName: 'zrepl', depType: 'stable', registryUrl, currentValue: '0.7.0-1' }]);
 });
 
 test('key order, indentation, quoting, flow mappings, comments and CRLF do not affect discovery', async () => {
-  const expected = [{ datasource: 'deb', depName: 'zrepl', registryUrl, currentValue: '0.7.0-1' }];
+  const expected = [{ datasource: 'deb', depName: 'zrepl', depType: 'stable', registryUrl, currentValue: '0.7.0-1' }];
   const reordered = Object.fromEntries(Object.entries(upstream).reverse());
   for (const content of [
     YAML.stringify({ tracks: [{ upstream: reordered, aliases: ['latest'], name: 'stable' }] }, { indent: 4 }),
