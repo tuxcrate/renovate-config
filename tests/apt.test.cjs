@@ -30,21 +30,21 @@ test('key order, indentation, quoting, flow mappings, comments and CRLF do not a
   const expected = [{ datasource: 'deb', depName: 'zrepl', depType: 'stable', registryUrl, currentValue: '0.7.0-1' }];
   const reordered = Object.fromEntries(Object.entries(upstream).reverse());
   for (const content of [
-    YAML.stringify({ tracks: [{ upstream: reordered, aliases: ['latest'], name: 'stable' }] }, { indent: 4 }),
+    YAML.stringify({ tracks: [{ upstream: reordered, tags: ['${version}', 'latest'], name: 'stable' }] }, { indent: 4 }),
     YAML.stringify({ tracks: [{ upstream, name: 'stable' }] }, { collectionStyle: 'flow' }),
-    `# any order is fine\ntracks:\n- aliases: ['{major}.{minor}', latest]\n  upstream:\n    version: '0.7.0-1' # exact APT pin\n    registryUrl: '${registryUrl}'\n    depName: zrepl\n    datasource: deb\n  name: stable\n`.replaceAll('\n', '\r\n'),
+    `# any order is fine\ntracks:\n- tags: ['\${version}', '\${major}.\${minor}', latest]\n  upstream:\n    version: '0.7.0-1' # exact APT pin\n    registryUrl: '${registryUrl}'\n    depName: zrepl\n    datasource: deb\n  name: stable\n`.replaceAll('\n', '\r\n'),
   ]) assert.deepEqual(await extract(content), expected, content);
 });
 
 test('package-only and application updates round trip while preserving YAML text', async () => {
   for (const version of ['0.7.0-2', '0.8.0-1', '1.12.34-12']) {
-    const content = `# keep comments\ntracks:\n  - name: stable\n    upstream: ${JSON.stringify(upstream)}\n    aliases: ["{major}.{minor}", latest]\n`;
+    const content = `# keep comments\ntracks:\n  - name: stable\n    upstream: ${JSON.stringify(upstream)}\n    tags: ["\${version}", "\${major}.\${minor}", latest]\n`;
     const [dep] = await extract(content);
     // JSONata's updater replaces the extracted currentValue in the source text.
     const updated = content.replace(dep.currentValue, version);
     assert.equal((await extract(updated))[0].currentValue, version);
     assert.ok(updated.startsWith('# keep comments\n'));
-    assert.ok(updated.includes('aliases: ["{major}.{minor}", latest]'));
+    assert.ok(updated.includes('tags: ["${version}", "${major}.${minor}", latest]'));
   }
 });
 

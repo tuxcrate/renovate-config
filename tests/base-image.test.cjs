@@ -44,11 +44,11 @@ tracks:
   - name: stable
     version: "1.2.3"
     baseImage: debian:13-slim@${digest}
-    aliases: [latest]
+    tags: ["\${version}", latest]
   - name: preview
     version: "2.0.0-rc.1"
     baseImage: debian:14-slim@${override}
-    aliases: [preview]
+    tags: ["\${version}", preview]
 `;
   assert.deepEqual(await extract(content), [
     { depName: 'debian', currentValue: '13-slim', currentDigest: digest },
@@ -73,7 +73,7 @@ test('preserves full registry paths and ports when splitting the tag', async () 
 });
 
 test('captures tag and digest independently for updates', async () => {
-  const content = `# preserve comments\ntracks:\n  - baseImage: debian:13.7-slim@${digest}\n    aliases: [latest]\n`;
+  const content = `# preserve comments\ntracks:\n  - baseImage: debian:13.7-slim@${digest}\n    tags: ["\${version}", latest]\n`;
   const dependency = (await extract(content))[0];
   const updatedDigest = `sha256:${'c'.repeat(64)}`;
   const digestUpdate = content.replace(dependency.currentDigest, updatedDigest);
@@ -81,7 +81,7 @@ test('captures tag and digest independently for updates', async () => {
   const tagUpdate = digestUpdate.replace(dependency.currentValue, '13.8-slim');
   assert.deepEqual((await extract(tagUpdate))[0], { ...dependency, currentValue: '13.8-slim', currentDigest: updatedDigest });
   assert.ok(tagUpdate.startsWith('# preserve comments\n'));
-  assert.ok(tagUpdate.includes('    aliases: [latest]\n'));
+  assert.ok(tagUpdate.includes('    tags: ["${version}", latest]\n'));
 });
 
 test('does not extract malformed or unrelated values', async () => {
@@ -104,7 +104,7 @@ test('does not extract malformed or unrelated values', async () => {
 });
 
 test('supports flow mappings, reordered keys and multiple YAML documents', async () => {
-  const tracks = [{ aliases: ['latest'], baseImage: `debian:13-slim@${digest}`, name: 'stable' }];
+  const tracks = [{ tags: ['${version}', 'latest'], baseImage: `debian:13-slim@${digest}`, name: 'stable' }];
   const expected = [{ depName: 'debian', currentValue: '13-slim', currentDigest: digest }];
   for (const content of [
     YAML.stringify({ tracks }, { indent: 4 }),
