@@ -60,6 +60,20 @@ test('upstream datasource is dynamic rather than restricted to APT and PyPI', as
   ]);
 });
 
+test('track names distinguish stable and prerelease updates for the same upstream', async () => {
+  const content = YAML.stringify({ tracks: [
+    { name: 'stable', upstream: { datasource: 'github-releases', depName: 'Sonarr/Sonarr', version: '4.0.20.3014' } },
+    { name: 'develop', prerelease: true, upstream: { datasource: 'github-releases', depName: 'Sonarr/Sonarr', version: '5.0.0.2668' } },
+  ] });
+  assert.deepEqual(await extract(content), [
+    { datasource: 'github-releases', depName: 'Sonarr/Sonarr', depType: 'stable', currentValue: '4.0.20.3014' },
+    { datasource: 'github-releases', depName: 'Sonarr/Sonarr', depType: 'develop', currentValue: '5.0.0.2668' },
+  ]);
+  const updated = content.replace('5.0.0.2668', '5.0.0.2700');
+  assert.equal((await extract(updated))[0].currentValue, '4.0.20.3014');
+  assert.equal((await extract(updated))[1].currentValue, '5.0.0.2700');
+});
+
 test('PyPI updates only propose stable X.Y.Z versions supported by the release planner', () => {
   const rule = preset.packageRules.find((r) => r.matchDatasources?.includes('pypi'));
   const allowed = new RegExp(rule.allowedVersions.slice(1, -1));
