@@ -1,0 +1,34 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Versioning support for Tuxcrate container images",
+  "packageRules": [
+    {
+      "description": "Keep Tuxcrate major aliases on their selected channel",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/tuxcrate/**"],
+      "matchCurrentValue": "/^\\d+(?:-prerelease)?$/",
+      "versioning": "regex:^(?<major>\\d+)(?:-(?<compatibility>prerelease))?$"
+    },
+    {
+      "description": "Keep Tuxcrate minor aliases on their selected channel",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/tuxcrate/**"],
+      "matchCurrentValue": "/^\\d+\\.\\d+(?:-prerelease)?$/",
+      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)(?:-(?<compatibility>prerelease))?$"
+    },
+    {
+      "description": "Treat three-part Tuxcrate image revisions as patch updates and retain the channel",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/tuxcrate/**"],
+      "matchCurrentValue": "/^\\d+\\.\\d+\\.\\d+(?:-prerelease)?(?:-r\\d+)?$/",
+      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<compatibility>prerelease))?(?:-r(?<build>\\d+))?$"
+    },
+    {
+      "description": "Treat four-part Tuxcrate image revisions as patch updates and retain the channel",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": ["ghcr.io/tuxcrate/**"],
+      "matchCurrentValue": "/^\\d+\\.\\d+\\.\\d+\\.\\d+(?:-prerelease)?(?:-r\\d+)?$/",
+      "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)\\.(?<build>\\d+)(?:-(?<compatibility>prerelease))?(?:-r(?<revision>\\d+))?$"
+    }
+  ]
+}

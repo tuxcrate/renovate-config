@@ -21,6 +21,6 @@ jobs:
         with:
           persist-credentials: false
       - name: Validate presets and repository configuration
-        run: renovate-config-validator --strict --no-global default.json images.json renovate.json
+        run: renovate-config-validator --strict --no-global default.json images.json tuxcrate.json renovate.json
       - name: Test custom manager extraction and replacement
         run: node --test tests/*.test.cjs
