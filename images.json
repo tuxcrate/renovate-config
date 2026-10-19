@@ -4,6 +4,15 @@
   "extends": [
     "github>tuxcrate/renovate-config"
   ],
+  "customDatasources": {
+    "github-prereleases": {
+      "defaultRegistryUrlTemplate": "https://api.github.com/repos/{{packageName}}/releases?per_page=100",
+      "format": "json",
+      "transformTemplates": [
+        "{ 'releases': [$[draft = false and prerelease = true].{ 'version': tag_name, 'releaseTimestamp': published_at, 'changelogUrl': html_url, 'isStable': false }], 'sourceUrl': 'https://github.com/{{packageName}}' }"
+      ]
+    }
+  },
   "customManagers": [
     {
       "customType": "jsonata",
