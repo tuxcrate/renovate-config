@@ -4,6 +4,7 @@ const preset = require('../tuxcrate.json');
 
 // Exercise Renovate's actual comparison and compatibility behavior in the CI image.
 const versioningModule = import('/usr/local/renovate/dist/modules/versioning/regex/index.js');
+const filterModule = import('/usr/local/renovate/dist/workers/repository/process/lookup/filter.js');
 
 function rulesFor(currentValue) {
   return preset.packageRules.filter((rule) => new RegExp(rule.matchCurrentValue.slice(1, -1)).test(currentValue));
@@ -20,7 +21,9 @@ test('the tuxcrate preset only configures versioning for Tuxcrate Docker images'
   assert.deepEqual(Object.keys(preset).sort(), ['$schema', 'description', 'packageRules']);
   assert.equal(preset.packageRules.length, 4);
   for (const rule of preset.packageRules) {
-    assert.deepEqual(Object.keys(rule).sort(), ['description', 'matchCurrentValue', 'matchDatasources', 'matchPackageNames', 'versioning']);
+    const keys = ['description', 'matchCurrentValue', 'matchDatasources', 'matchPackageNames', 'versioning'];
+    if (rule.allowedVersions !== undefined) keys.push('allowedVersions');
+    assert.deepEqual(Object.keys(rule).sort(), keys.sort());
     assert.deepEqual(rule.matchDatasources, ['docker']);
     assert.deepEqual(rule.matchPackageNames, ['ghcr.io/tuxcrate/**']);
   }
@@ -37,6 +40,38 @@ test('supports numeric aliases, exact application versions, and immutable revisi
         assert.ok(api.isStable(tag), tag);
       }
     }
+  }
+});
+
+test('full-version updates require explicit revisions while existing aliases remain valid', async () => {
+  for (const [current, nextVersion] of [
+    ['1.32.19-r6', '1.32.20'],
+    ['1.32.19', '1.32.20'],
+    ['4.0.20.3014-r6', '4.0.20.3015'],
+    ['4.0.20.3014', '4.0.20.3015'],
+  ]) {
+    for (const channel of ['', '-prerelease']) {
+      const currentTag = current.replace(/(-r\d+)?$/, `${channel}$1`);
+      const rule = rulesFor(currentTag)[0];
+      const api = await versioningFor(currentTag);
+      const allowed = new RegExp(rule.allowedVersions.slice(1, -1));
+      const alias = `${nextVersion}${channel}`;
+      const revision = `${alias}-r0`;
+      assert.ok(api.isVersion(currentTag), currentTag);
+      assert.ok(api.isGreaterThan(revision, currentTag), `${currentTag} -> ${revision}`);
+      assert.ok(api.isCompatible(revision, currentTag), revision);
+      assert.equal(allowed.test(alias), false, alias);
+      assert.equal(allowed.test(revision), true, revision);
+      assert.equal(allowed.test(`${alias}-r12`), true);
+      assert.equal(allowed.test(`${alias}-rx`), false);
+      const { filterVersions } = await filterModule;
+      const releases = [alias, revision].map((version) => ({ version }));
+      const filtered = filterVersions({ allowedVersions: rule.allowedVersions }, currentTag, '', releases, api);
+      assert.deepEqual(filtered.map((release) => release.version), [revision]);
+    }
+  }
+  for (const current of ['6', '6-prerelease', '6.4', '6.4-prerelease']) {
+    assert.equal(rulesFor(current)[0].allowedVersions, undefined, current);
   }
 });
 

@@ -21,6 +21,7 @@
       "matchDatasources": ["docker"],
       "matchPackageNames": ["ghcr.io/tuxcrate/**"],
       "matchCurrentValue": "/^\\d+\\.\\d+\\.\\d+(?:-prerelease)?(?:-r\\d+)?$/",
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+(?:-prerelease)?-r\\d+$/",
       "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)(?:-(?<compatibility>prerelease))?(?:-r(?<build>\\d+))?$"
     },
     {
@@ -28,6 +29,7 @@
       "matchDatasources": ["docker"],
       "matchPackageNames": ["ghcr.io/tuxcrate/**"],
       "matchCurrentValue": "/^\\d+\\.\\d+\\.\\d+\\.\\d+(?:-prerelease)?(?:-r\\d+)?$/",
+      "allowedVersions": "/^\\d+\\.\\d+\\.\\d+\\.\\d+(?:-prerelease)?-r\\d+$/",
       "versioning": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)\\.(?<build>\\d+)(?:-(?<compatibility>prerelease))?(?:-r(?<revision>\\d+))?$"
     }
   ]
