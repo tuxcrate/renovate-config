@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 15
     container:
-      image: ghcr.io/renovatebot/renovate:44
+      image: ghcr.io/renovatebot/renovate:45
       # Checkout needs access to the runner-owned workspace and command files.
       options: --user 0
     steps:
